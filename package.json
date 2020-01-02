@@ -7,7 +7,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/chrome": "^0.0.91",
-    "typescript": "^3.7.2"
+    "typescript": "^3.7.4"
   },
   "scripts": {
     "compile": "tsc -p tsconfig.json",
