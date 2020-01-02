@@ -1,3 +1,8 @@
+declare const REPLACE: {
+	getPlayer(): YoutubeVideoPlayer;
+	amount: number;
+};
+
 import { ExternalMessage } from "../background/background";
 
 export interface YoutubeVideoPlayer extends HTMLElement {
@@ -17,40 +22,95 @@ export interface YoutubeVideoPlayer extends HTMLElement {
 	seekTo(seconds: number): void;
 }
 
-function externalMessage(data: ExternalMessage) {
-	const player = document.querySelector('.html5-video-player') as YoutubeVideoPlayer;
+function createTag(fn: Function): string {
+	const str = fn.toString();
+	return (() => {
+		const tag = document.createElement('script');
+		tag.innerHTML = `(${str})();`;
+		document.documentElement.appendChild(tag);
+		document.documentElement.removeChild(tag);
+	}).toString().replace('str', str);
+}
 
-	const currentVolume = player.getVolume();
+function replaceParameters(code: string, parameters: {
+	[key: string]: number|string|boolean|((...args: any[]) => void);
+}): string {
+	Object.getOwnPropertyNames(parameters).forEach((key) => {
+		const arg = parameters[key];
+		if (typeof arg === 'string' && arg.split('\n').length > 1) {
+			code = code.replace(new RegExp(`REPLACE\.${key}`, 'g'), 
+				`' + ${JSON.stringify(arg.split('\n'))}.join('\\n') + '`);
+		} else if (typeof arg === 'function') {
+			code = code.replace(new RegExp(`REPLACE\.${key}`, 'g'),
+				`(${arg.toString()})`);
+		} else {
+			code = code.replace(new RegExp(`REPLACE\.${key}`, 'g'), 
+				arg !== undefined && arg !== null && typeof arg === 'string' ?
+					arg.replace(/\\\"/g, `\\\\\"`) : arg.toString());
+		}
+	});
+	return code;
+}
+
+function hacksecute(fn: Function, params: {
+	[key: string]: number|string|boolean|((...args: any[]) => void);
+} = {}) {
+	new Function(replaceParameters(`(${createTag(fn)})()`, params))();	
+}
+
+function getPlayer() {
+	return document.querySelector('.html5-video-player') as YoutubeVideoPlayer;
+}
+
+function externalMessage(data: ExternalMessage) {
+	console.log('action', data.action);
 	switch (data.action) {
 		case 'play':
-			player.playVideo();
+			hacksecute(() => {
+				const player = REPLACE.getPlayer();
+				player.playVideo();
+			}, { getPlayer });
 			break;
 		case 'pause':
-			player.pauseVideo();
+			hacksecute(() => {
+				const player = REPLACE.getPlayer();
+				player.pauseVideo();
+			}, { getPlayer });
 			break;
 		case 'playpause':
-			const state = player.getPlayerState();
-			if (state === 2) {
-				//Paused
-				player.playVideo();
-			} else if (state === 1) {
-				//Playing
-				player.pauseVideo();
-			} else {
-				//???
-			}
+			hacksecute(() => {
+				const player = REPLACE.getPlayer();
+				const state = player.getPlayerState();
+				if (state === 2) {
+					//Paused
+					player.playVideo();
+				} else if (state === 1) {
+					//Playing
+					player.pauseVideo();
+				} else {
+					//???
+				}
+			}, { getPlayer });
 			break;
 		case 'volumeUp':
-			player.setVolume(currentVolume + (data.amount ?? 10));
+			hacksecute(() => {
+				const player = REPLACE.getPlayer();
+				const currentVolume = player.getVolume();
+				player.setVolume(currentVolume + (REPLACE.amount));
+			}, { getPlayer, amount: data.amount ?? 10 });
 			break;
 		case 'volumeDown':
-			player.setVolume(currentVolume - (data.amount ?? 10));
+			hacksecute(() => {
+				const player = REPLACE.getPlayer();
+				const currentVolume = player.getVolume();
+				player.setVolume(currentVolume - (REPLACE.amount));
+			}, { getPlayer, amount: data.amount ?? 10 });
 			break;
 		case 'setVolume':
-			player.setVolume(data.amount);
-			break;
-		case 'close':
-			window.close();
+			hacksecute(() => {
+				const player = REPLACE.getPlayer();
+				player.setVolume((REPLACE.amount));
+			}, { getPlayer, amount: data.amount});
 			break;
 	}
 }
@@ -59,8 +119,10 @@ chrome.runtime.onMessage.addListener((message: {
 	type: 'external';
 	data: ExternalMessage;
 }) => {
+	console.log('got', message);
 	switch (message.type) {
 		case 'external':
+			console.log('external', message.data);
 			externalMessage(message.data);
 			break;
 	}
