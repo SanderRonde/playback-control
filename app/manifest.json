@@ -14,10 +14,12 @@
 		{
 			"matches": [ "http://www.youtube.com/watch*", "https://www.youtube.com/watch*" ],
 			"js": [ "content/youtube.js" ]
-		}, 
-		{
+		}, {
 			"matches": [ "http://www.netflix.com/watch*", "https://www.netflix.com/watch*" ],
-			"js": [ "content/netflix.js" ]
+			"js": [ "content/video.js" ]
+		}, {
+			"matches": ["http://plex.sanderron.de/*", "https://plex.sanderron.de/*"],
+			"js": [ "content/video.js" ]
 		}
 	],
 

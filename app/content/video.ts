@@ -18,9 +18,14 @@ function externalMessage(data: ExternalMessage) {
 			const playButton = (document.querySelector('.player-control-button') as ClickableElement);
 			playButton.click();
 			break;
-		case 'close':
-			window.close();
+		case 'volumeUp':
+			video.volume = Math.min(1, video.volume + ((data.amount ?? 10) / 100));
 			break;
+		case 'volumeDown':
+			video.volume = Math.max(0, video.volume - ((data.amount ?? 10) / 100));
+			break;
+		case 'setVolume':
+			video.volume = data.amount;
 	}
 }
 
