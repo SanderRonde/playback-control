@@ -1,7 +1,7 @@
 const SERVER_URL = "***REMOVED***";
 
 export type ExternalMessage = {
-	action: 'play'|'pause'|'playpause'|'close';
+	action: 'play'|'pause'|'playpause';
 }|{
 	action: 'volumeUp'|'volumeDown';
 	amount?: number;
@@ -17,11 +17,11 @@ namespace Background {
 			ws.onmessage = (event) => {
 				Comm.sendToContentScripts(event.data);
 			}
-			ws.onclose = () => {
-				listen();
-			};
-			ws.onerror = () => {
+			ws.onclose = ws.onerror = () => {
 				window.setTimeout(listen, 10000);
+			};
+			ws.onopen = () => {
+				ws.send('***REMOVED***');
 			}
 		}
 	}
@@ -31,9 +31,10 @@ namespace Background {
 			chrome.tabs.query({ }, (tabs) => {
 				for (const tab of tabs) {
 					if (tab.id) {
+						const msg = JSON.parse(message) as ExternalMessage;
 						chrome.tabs.sendMessage(tab.id, {
 							type: 'external',
-							data: JSON.parse(message) as ExternalMessage
+							data: msg
 						});
 					}
 				}
