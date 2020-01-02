@@ -1,4 +1,4 @@
-const SERVER_URL = "***REMOVED***";
+const SERVER_URL = "SERVER_URL";
 
 export type ExternalMessage = {
 	action: 'play'|'pause'|'playpause';
@@ -21,7 +21,7 @@ namespace Background {
 				window.setTimeout(listen, 10000);
 			};
 			ws.onopen = () => {
-				ws.send('***REMOVED***');
+				ws.send('AUTH_KEY');
 			}
 		}
 	}
