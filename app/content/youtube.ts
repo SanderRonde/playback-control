@@ -63,7 +63,6 @@ function getPlayer() {
 }
 
 function externalMessage(data: ExternalMessage) {
-	console.log('action', data.action);
 	switch (data.action) {
 		case 'play':
 			hacksecute(() => {
@@ -119,10 +118,8 @@ chrome.runtime.onMessage.addListener((message: {
 	type: 'external';
 	data: ExternalMessage;
 }) => {
-	console.log('got', message);
 	switch (message.type) {
 		case 'external':
-			console.log('external', message.data);
 			externalMessage(message.data);
 			break;
 	}
