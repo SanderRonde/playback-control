@@ -2,7 +2,7 @@
     "compilerOptions": {
         "alwaysStrict": true,
         "forceConsistentCasingInFileNames": true,
-        "module": "commonjs",
+        "module": "ES6",
         "noImplicitAny": true,
         "noImplicitThis": true,
         "removeComments": true,
@@ -13,7 +13,7 @@
         "noFallthroughCasesInSwitch": true,
         "noImplicitReturns": true,
         "noUnusedLocals": true,
-        "target": "esnext",
+        "target": "ES2015",
         "strictBindCallApply": true,
         "strictNullChecks": true,
         "strictFunctionTypes": true,
